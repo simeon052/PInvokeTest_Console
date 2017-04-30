@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <stdlib.h>
 #include <memory.h>
+#include <tchar.h>
 
 
 __declspec(dllexport)
@@ -25,12 +26,24 @@ void replacestr(char **pstrsrc, int length)
 
 char* addstr(char **pstrsrc, int length)
 {
-	char* addstr = "_UWP";
+	char* addstr = "_Windows";
 
-	char* pstrDist = (char *)malloc(length + 8);
+	char* pstrDist = (char *)malloc(length + 9);
 	memcpy(pstrDist, *pstrsrc, length);
-	memcpy(pstrDist + length, addstr, 8);
-
+	memcpy(pstrDist + length, addstr, 9);
+	OutputDebugStringA(pstrDist);
 	return pstrDist;
 }
 
+
+void GetErrors(struct Data* list, int count) {
+
+	for (int i = 0; i < count; i++) {
+		(list + i)->error = i;
+		strcpy_s((list + i)->errormessage,"Error Message");
+		OutputDebugString(_T("Now"));
+	}
+
+	return;
+}
+ 

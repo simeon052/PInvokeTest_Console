@@ -11,18 +11,21 @@
 // Windows ヘッダー ファイル:
 #include <windows.h>
 
-
+struct Data {
+	int error;
+	char errormessage[32];
+};
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください
 extern "C"
 {
 
-__declspec(dllexport) 
+__declspec(dllexport) 	int add(int a, int b);
 
-	int add(int a, int b);
+__declspec(dllexport) 	char * addstr(char **src, int length);
 
-	char * addstr(char **src, int length);
+__declspec(dllexport) 	void replacestr(char **src, int length);
 
-	void replacestr(char **src, int length);
+__declspec(dllexport)   void GetErrors(struct Data *, int);
 
 }
