@@ -14,6 +14,8 @@
 struct Data {
 	int error;
 	char errormessage[32];
+	char *description;
+	
 };
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください
@@ -27,5 +29,8 @@ __declspec(dllexport) 	char * addstr(char **src, int length);
 __declspec(dllexport) 	void replacestr(char **src, int length);
 
 __declspec(dllexport)   void GetErrors(struct Data *, int);
+
+__declspec(dllexport)   struct Data *GetErrors2(int *count);
+
 
 }

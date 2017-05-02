@@ -18,6 +18,8 @@ namespace PInvokeTest_Console
             Console.WriteLine($"Add string : {NativeLib.Addstr("Test")}");
 
             NativeLib.GetErrors_cs();
+
+            NativeLib.GetErrors2_cs();
         }
     }
     [StructLayout(LayoutKind.Sequential)]
@@ -26,9 +28,13 @@ namespace PInvokeTest_Console
         const int buffersize = 32;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int count;
+        public int error;
+
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = buffersize)]
-        public Byte[] data;
+        public Byte[] errMsg;
+
+//        [MarshalAs(UnmanagedType.U8)]
+        public IntPtr description;
     }
 
     internal class NativeLib
@@ -71,7 +77,7 @@ namespace PInvokeTest_Console
         {
             const int totalCount = 10;
             var a = typeof(Data);
-            IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf<Data>() * 10);
+            IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf<Data>() * totalCount);
             NativeLib.GetErrors(result, totalCount);
 
             var pos = new IntPtr(result.ToInt64());
@@ -80,7 +86,37 @@ namespace PInvokeTest_Console
             {
                 resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
                 pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
-                Console.WriteLine($"{resultList.Last<Data>().count.ToString()} - { System.Text.Encoding.ASCII.GetString(resultList.Last<Data>().data)}"); ;
+                Marshal.DestroyStructure(pos, typeof(Data)); 
+                //                Console.WriteLine($"{resultList.Last<Data>().count.ToString()} - { System.Text.Encoding.ASCII.GetString(resultList.Last<Data>().data)}"); ;
+            }
+            foreach(var d in resultList)
+            {
+                Console.WriteLine($"{d.error} - {d.errMsg}"); ;
+            }
+
+
+            return resultList;
+        }
+
+        [DllImport("Win32CppLib")]
+        private static extern IntPtr GetErrors2(out int count);
+
+        public static List<Data> GetErrors2_cs()
+        {
+            int totalCount;
+            var resultList = new List<Data>();
+
+            var result = NativeLib.GetErrors2(out totalCount);
+
+            var pos = new IntPtr(result.ToInt64());
+            for (int i = 0; i < totalCount; i++)
+            {
+                resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
+                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
+            }
+            foreach(var d in resultList)
+            {
+                Console.WriteLine($"{d.error} - { d.errMsg}"); ;
             }
 
             return resultList;
