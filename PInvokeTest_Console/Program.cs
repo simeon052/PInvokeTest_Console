@@ -69,34 +69,6 @@ namespace PInvokeTest_Console
             return resultStr;
         }
 
-        //[DllImport("Win32CppLib", CharSet =CharSet.Ansi)]
-        //private static extern void GetErrors(IntPtr ptr, int count);
-
-        //public static List<Data> GetErrors_cs()
-        //{
-        //    const int totalCount = 10;
-        //    Data[] data = new Data;
-
-        //    IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf<Data>() * totalCount);
-
-        //    NativeLib.GetErrors(result, totalCount);
-
-        //    var pos = new IntPtr(result.ToInt64());
-        //    var resultList = new List<Data>();
-        //    for (int i = 0; i < totalCount; i++)
-        //    {
-        //        resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
-        //        pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
-        //    }
-        //    foreach (var d in resultList)
-        //    {
-        //        Console.WriteLine($"{d.error} - {d.errMsg}"); ;
-        //    }
-        //    Marshal.FreeHGlobal(result);
-
-        //    return resultList;
-        //}
-
         [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
         private static extern IntPtr GetData(out IntPtr data);
 
@@ -125,18 +97,6 @@ namespace PInvokeTest_Console
                     }
                 } while (loopend != true);
             }
-
-//            var pos = new IntPtr(result.ToInt64());
-//            for (int i = 0; i < totalCount; i++)
-//            {
-//                resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
-//                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
-//            }
-//            foreach(var d in resultList)
-//            {
-////                Console.WriteLine($"{d.error} - { System.Text.Encoding.ASCII.GetString(d.errMsg)} - {Marshal.PtrToStringAnsi(d.description)}"); ;
-////                Console.WriteLine($"{d.error} - { d.errMsg } - {d.description}"); ;
-//            }
 
             return resultList;
         }
