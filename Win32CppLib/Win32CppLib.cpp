@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <tchar.h>
+#include <stdio.h>
 
 
 __declspec(dllexport)
@@ -36,32 +37,33 @@ char* addstr(char **pstrsrc, int length)
 }
 
 
-void GetErrors(struct Data* list, int count) {
+void GetData(struct Data** dataList) {
 
-	for (int i = 0; i < count; i++) {
+	int count = 3;
+	struct Data *currentPos;
+	currentPos = new struct Data;
+	*dataList = currentPos; // æ“ª‚ð•Û‘¶
 
-		list[i].description = (char *)calloc(256, 0);
-		list[i].error = i;
-		strcpy_s(list[i].errormessage,"Error Message\n\0");
-//		memcpy_s(list[i].description, 256, "Some Message\n\0", 11);
-		OutputDebugString(_T("Now"));
+	int i = 0;
+	while (1) {
+		currentPos->info = i + 1; //Œ»Ý‚Ì—v‘f‚É’l‚ð‘ã“ü
+		currentPos->subInfo = i + 0xff;
+		currentPos->message = L"Some message";
+
+		if (i + 1 >= count) {
+			currentPos->next = nullptr;
+			printf("0x%016llx [%d]\n  -> 0x%16llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
+			break;
+		}
+		else
+		{
+			//ŽŸ‚Ì—v‘f‚ðŠm•Û
+			currentPos->next = new struct Data;
+			printf("0x%016llx [%d]\n  -> 0x%016llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
+			currentPos = currentPos->next; // —v‘f‚ðŽŸ‚ÉˆÚ“®
+		}
+		i++;
 	}
 
 	return;
-}
-
-struct Data *GetErrors2(int *count) {
-
-	struct Data *list;
-	*count = 10;
-	list = new struct Data[*count];
-	for (int i = 0; i < *count; i++) {
-		list[i].description = (char *)calloc(256, 0);
-		(list + i)->error = i;
-		strcpy_s((list + i)->errormessage,"Error Message 2\n\0");
-//		memcpy_s(list[i].description, 256, "Some Message\n\0", 11);
-		OutputDebugString(_T("Now"));
-	}
-
-	return list;
 }

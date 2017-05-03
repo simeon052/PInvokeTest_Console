@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PInvokeTest_Console
 {
@@ -17,7 +18,7 @@ namespace PInvokeTest_Console
 
             Console.WriteLine($"Add string : {NativeLib.Addstr("Test")}");
 
-            NativeLib.GetErrors_cs();
+//            NativeLib.GetErrors_cs();
 
             NativeLib.GetErrors2_cs();
         }
@@ -25,16 +26,16 @@ namespace PInvokeTest_Console
     [StructLayout(LayoutKind.Sequential)]
     internal class Data
     {
-        const int buffersize = 32;
+        [MarshalAs(UnmanagedType.I4)]
+        public int info;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int error;
+        public int subInfo;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = buffersize)]
-        public Byte[] errMsg;
+        public IntPtr messasg;
 
-//        [MarshalAs(UnmanagedType.U8)]
-        public IntPtr description;
+        public IntPtr next;
+
     }
 
     internal class NativeLib
@@ -65,59 +66,77 @@ namespace PInvokeTest_Console
             string dst = src;
             var result = NativeLib.addstr(ref dst, dst.Length);
             var resultStr = Marshal.PtrToStringAnsi(result);
-            // TODO : C++ module allocated some memory, must be freed.
-            //            Marshal.FreeCoTaskMem(result);
             return resultStr;
         }
 
-        [DllImport("Win32CppLib")]
-        private static extern void GetErrors(IntPtr ptr, int count);
+        //[DllImport("Win32CppLib", CharSet =CharSet.Ansi)]
+        //private static extern void GetErrors(IntPtr ptr, int count);
 
-        public static List<Data> GetErrors_cs()
-        {
-            const int totalCount = 10;
-            var a = typeof(Data);
-            IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf<Data>() * totalCount);
-            NativeLib.GetErrors(result, totalCount);
+        //public static List<Data> GetErrors_cs()
+        //{
+        //    const int totalCount = 10;
+        //    Data[] data = new Data;
 
-            var pos = new IntPtr(result.ToInt64());
-            var resultList = new List<Data>();
-            for(int i = 0; i< totalCount; i++)
-            {
-                resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
-                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
-                Marshal.DestroyStructure(pos, typeof(Data)); 
-                //                Console.WriteLine($"{resultList.Last<Data>().count.ToString()} - { System.Text.Encoding.ASCII.GetString(resultList.Last<Data>().data)}"); ;
-            }
-            foreach(var d in resultList)
-            {
-                Console.WriteLine($"{d.error} - {d.errMsg}"); ;
-            }
+        //    IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf<Data>() * totalCount);
 
+        //    NativeLib.GetErrors(result, totalCount);
 
-            return resultList;
-        }
+        //    var pos = new IntPtr(result.ToInt64());
+        //    var resultList = new List<Data>();
+        //    for (int i = 0; i < totalCount; i++)
+        //    {
+        //        resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
+        //        pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
+        //    }
+        //    foreach (var d in resultList)
+        //    {
+        //        Console.WriteLine($"{d.error} - {d.errMsg}"); ;
+        //    }
+        //    Marshal.FreeHGlobal(result);
 
-        [DllImport("Win32CppLib")]
-        private static extern IntPtr GetErrors2(out int count);
+        //    return resultList;
+        //}
+
+        [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
+        private static extern IntPtr GetData(out IntPtr data);
 
         public static List<Data> GetErrors2_cs()
         {
-            int totalCount;
             var resultList = new List<Data>();
+            IntPtr data;
+            var result = NativeLib.GetData(out data);
 
-            var result = NativeLib.GetErrors2(out totalCount);
 
-            var pos = new IntPtr(result.ToInt64());
-            for (int i = 0; i < totalCount; i++)
+            var stData = (Data)Marshal.PtrToStructure<Data>(data);
+            if (data != IntPtr.Zero)
             {
-                resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
-                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
+                bool loopend = false;
+                do
+                {
+                    Console.WriteLine($"{stData.info} - {stData.subInfo} - {Marshal.PtrToStringUni(stData.messasg)}");
+                    if (stData.next != IntPtr.Zero)
+                    {
+                        stData = (Data)(Marshal.PtrToStructure<Data>(stData.next));
+                    }
+                    else
+                    {
+                        loopend = true;
+
+                    }
+                } while (loopend != true);
             }
-            foreach(var d in resultList)
-            {
-                Console.WriteLine($"{d.error} - { d.errMsg}"); ;
-            }
+
+//            var pos = new IntPtr(result.ToInt64());
+//            for (int i = 0; i < totalCount; i++)
+//            {
+//                resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
+//                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
+//            }
+//            foreach(var d in resultList)
+//            {
+////                Console.WriteLine($"{d.error} - { System.Text.Encoding.ASCII.GetString(d.errMsg)} - {Marshal.PtrToStringAnsi(d.description)}"); ;
+////                Console.WriteLine($"{d.error} - { d.errMsg } - {d.description}"); ;
+//            }
 
             return resultList;
         }
