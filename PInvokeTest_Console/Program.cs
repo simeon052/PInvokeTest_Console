@@ -20,7 +20,7 @@ namespace PInvokeTest_Console
 
 //            NativeLib.GetErrors_cs();
 
-            NativeLib.GetErrors2_cs();
+            NativeLib.GetData();
         }
     }
     [StructLayout(LayoutKind.Sequential)]
@@ -72,23 +72,26 @@ namespace PInvokeTest_Console
         [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
         private static extern IntPtr GetData(out IntPtr data);
 
-        public static List<Data> GetErrors2_cs()
+        public static List<Data> GetData()
         {
             var resultList = new List<Data>();
             IntPtr data;
             var result = NativeLib.GetData(out data);
 
 
-            var stData = (Data)Marshal.PtrToStructure<Data>(data);
+
+            resultList.Add((Data)Marshal.PtrToStructure<Data>(data));
+            var currentData = resultList.First<Data>();
             if (data != IntPtr.Zero)
             {
                 bool loopend = false;
                 do
                 {
-                    Console.WriteLine($"{stData.info} - {stData.subInfo} - {Marshal.PtrToStringUni(stData.messasg)}");
-                    if (stData.next != IntPtr.Zero)
+                    Console.WriteLine($"{currentData.info} - {currentData.subInfo} - {Marshal.PtrToStringUni(currentData.messasg)}");
+                    if (currentData.next != IntPtr.Zero)
                     {
-                        stData = (Data)(Marshal.PtrToStructure<Data>(stData.next));
+                        resultList.Add((Data)(Marshal.PtrToStructure<Data>(currentData.next)));
+                        currentData = resultList.Last<Data>();
                     }
                     else
                     {
