@@ -55,7 +55,7 @@ namespace PInvokeTest_Console
             }
         }
 
-        public static Data GetThis(IntPtr ptr) {
+        public static Data PtrToThis(IntPtr ptr) {
             return Marshal.PtrToStructure<Data>(ptr);
         }
 
@@ -109,7 +109,7 @@ namespace PInvokeTest_Console
             // Add in List at C#
             if (data != IntPtr.Zero)
             {
-                var currentData = Data.GetThis(data);
+                var currentData = Data.PtrToThis(data);
                 do
                 {
                     Console.WriteLine($"{currentData.info} - {currentData.subInfo} - {currentData.messageStr}");
