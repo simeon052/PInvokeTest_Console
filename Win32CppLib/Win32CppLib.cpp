@@ -38,6 +38,9 @@ void addstr(char *pstrsrc, int capacity)
 
 static struct Data* stored;
 
+///
+/// データの領域を確保して、リストにして返す
+///
 void GetData(struct Data** dataList) {
 
 	int count = 5;
@@ -75,8 +78,7 @@ void GetData(struct Data** dataList) {
 void Cleanup() {
 
 	if (stored != nullptr) {
-			struct Data *tmp;
-			tmp = stored->next;
+		struct Data *tmp = stored->next;
 		do {
 			delete(stored);
 			stored = tmp;
