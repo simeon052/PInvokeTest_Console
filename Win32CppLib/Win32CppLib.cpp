@@ -74,7 +74,7 @@ void GetData(struct Data** dataList) {
 	return;
 }
 
-static struct Data* Array;
+static struct Data* storedArray;
 ///
 /// データの領域を確保して、配列にして返す
 ///
@@ -82,7 +82,7 @@ void GetDataByArray(struct Data** dataList, int *count) {
 
 	*count = 5;
 	*dataList = new struct Data[*count];
-	Array = *dataList;
+	storedArray = *dataList;
 	for (int i = 0; i < *count; i++) {
 		(*dataList)[i].info = i;
 		(*dataList)[i].subInfo = i + 0xff;
@@ -106,7 +106,7 @@ void Cleanup() {
 		delete stored;
 	}
 
-	if (Array != nullptr) {
-		delete[] Array;
+	if (storedArray != nullptr) {
+		delete[] storedArray;
 	}
 }
