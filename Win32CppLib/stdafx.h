@@ -31,4 +31,7 @@ __declspec(dllexport) 	void replacestr(char *src, int length, int capacity);
 __declspec(dllexport)   void GetData(struct Data **);
 
 __declspec(dllexport)   void Cleanup();
+
+__declspec(dllexport)   void GetDataByArray(struct Data** dataList, int *count);
+
 }

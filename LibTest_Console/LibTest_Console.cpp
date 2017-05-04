@@ -22,6 +22,16 @@ int main()
 	}while(current != nullptr);
 	std::cout << "End\n";
 
+	std::cout << "Start 2\n";
+	struct Data *datalist2;
+	int count;
+	GetDataByArray(&datalist2, &count);
+	int s = sizeof(struct Data);
+	for (int i = 0; i < count; i++) {
+		printf("%d %d %ws\n", datalist2[i].info, datalist2[i].subInfo, datalist2[i].message);
+	}
+	std::cout << "End 2\n";
+
 	Cleanup();
     return 0;
 }
