@@ -37,7 +37,7 @@ void addstr(char *pstrsrc, int capacity)
 
 void GetData(struct Data** dataList) {
 
-	int count = 3;
+	int count = 5;
 	struct Data *currentPos;
 	currentPos = new struct Data;
 	*dataList = currentPos; // æ“ª‚ğ•Û‘¶

@@ -30,9 +30,34 @@ namespace PInvokeTest_Console
         [MarshalAs(UnmanagedType.I4)]
         public int subInfo;
 
-        public IntPtr message;
+        private IntPtr message;
 
-        public IntPtr next;
+        private IntPtr next;
+
+        public string messageStr
+        {
+            get {
+                return Marshal.PtrToStringUni(this.message);
+            }
+        }
+
+        public Data GetNext
+        {
+            get {
+                if (this.next != IntPtr.Zero)
+                {
+                    return Marshal.PtrToStructure<Data>(this.next);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public static Data GetThis(IntPtr ptr) {
+            return Marshal.PtrToStructure<Data>(ptr);
+        }
 
     }
 
@@ -71,35 +96,27 @@ namespace PInvokeTest_Console
         }
 
         [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
-        private static extern IntPtr GetData(out IntPtr data);
+        private static extern void GetData(out IntPtr data);
 
         public static List<Data> GetData()
         {
             var resultList = new List<Data>();
+
+            // Get structure list from C++
             IntPtr data;
-            var result = NativeLib.GetData(out data);
+            NativeLib.GetData(out data);
 
-
-
-            resultList.Add((Data)Marshal.PtrToStructure<Data>(data));
-            var currentData = resultList.First<Data>();
+            // Add in List at C#
             if (data != IntPtr.Zero)
             {
-                bool loopend = false;
+                var currentData = Data.GetThis(data);
                 do
                 {
-                    Console.WriteLine($"{currentData.info} - {currentData.subInfo} - {Marshal.PtrToStringUni(currentData.message)}");
-                    if (currentData.next != IntPtr.Zero)
-                    {
-                        resultList.Add((Data)(Marshal.PtrToStructure<Data>(currentData.next)));
-                        currentData = resultList.Last<Data>();
-                    }
-                    else
-                    {
-                        loopend = true;
-
-                    }
-                } while (loopend != true);
+                    Console.WriteLine($"{currentData.info} - {currentData.subInfo} - {currentData.messageStr}");
+                    resultList.Add(currentData);
+                    currentData = currentData.GetNext;
+                } while (currentData != null);
+                resultList.Remove(null);
             }
 
             return resultList;
