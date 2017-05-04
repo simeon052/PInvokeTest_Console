@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PInvokeTest_Console
 {
@@ -13,22 +14,55 @@ namespace PInvokeTest_Console
 
             Console.WriteLine($"Add : {NativeLib.Add(1, 1).ToString()}");
 
-            Console.WriteLine($"Replace string : {NativeLib.Replacestr("Test")}");
+            Console.WriteLine($"Replace string : {NativeLib.Replacestr("Password")}");
 
             Console.WriteLine($"Add string : {NativeLib.Addstr("Test")}");
 
-            NativeLib.GetErrors_cs();
+            NativeLib.GetData();
+
+            NativeLib.GetDataByArray();
+
+            NativeLib.Clean();
         }
     }
     [StructLayout(LayoutKind.Sequential)]
     internal class Data
     {
-        const int buffersize = 32;
+        [MarshalAs(UnmanagedType.I4)]
+        public int info;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int count;
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = buffersize)]
-        public Byte[] data;
+        public int subInfo;
+
+        private IntPtr message;
+
+        private IntPtr next;
+
+        public string messageStr
+        {
+            get {
+                return Marshal.PtrToStringUni(this.message);
+            }
+        }
+
+        public Data GetNext
+        {
+            get {
+                if (this.next != IntPtr.Zero)
+                {
+                    return Marshal.PtrToStructure<Data>(this.next);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public static Data PtrToThis(IntPtr ptr) {
+            return Marshal.PtrToStructure<Data>(ptr);
+        }
+
     }
 
     internal class NativeLib
@@ -37,10 +71,10 @@ namespace PInvokeTest_Console
         private static extern int add(int a, int b);
  
         [DllImport("Win32CppLib")]
-        private static extern IntPtr addstr(ref string src, int length);
+        private static extern void addstr([MarshalAs(UnmanagedType.LPStr)] StringBuilder src, int capacity);
 
         [DllImport("Win32CppLib")]
-        private static extern void replacestr(ref string src, int length);
+        private static extern void replacestr([MarshalAs(UnmanagedType.LPStr)] StringBuilder srcsrc, int length, int capacity);
 
         public static int Add(int a, int b)
         {
@@ -49,41 +83,78 @@ namespace PInvokeTest_Console
 
         public static string Replacestr(string src)
         {
-            string dst = src;
-            NativeLib.replacestr(ref dst, dst.Length);
-            return dst;
+            var dst = new StringBuilder(256);
+            dst.Append(src);
+            NativeLib.replacestr(dst, dst.Length, dst.Capacity);
+            return dst.ToString();
         }
 
         public static string Addstr(string src)
         {
-            string dst = src;
-            var result = NativeLib.addstr(ref dst, dst.Length);
-            var resultStr = Marshal.PtrToStringAnsi(result);
-            // TODO : C++ module allocated some memory, must be freed.
-            //            Marshal.FreeCoTaskMem(result);
-            return resultStr;
+            StringBuilder dst = new StringBuilder(256);
+            dst.Append(src);
+
+            NativeLib.addstr(dst, dst.Capacity);
+            
+            return dst.ToString();
         }
 
-        [DllImport("Win32CppLib")]
-        private static extern void GetErrors(IntPtr ptr, int count);
+        [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
+        private static extern void GetData(out IntPtr data);
 
-        public static List<Data> GetErrors_cs()
+        public static List<Data> GetData()
         {
-            const int totalCount = 10;
-            var a = typeof(Data);
-            IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf<Data>() * 10);
-            NativeLib.GetErrors(result, totalCount);
-
-            var pos = new IntPtr(result.ToInt64());
             var resultList = new List<Data>();
-            for(int i = 0; i< totalCount; i++)
+
+            // Get structure list from C++
+            IntPtr data;
+            NativeLib.GetData(out data);
+
+            // Add in List at C#
+            if (data != IntPtr.Zero)
             {
-                resultList.Add((Data)Marshal.PtrToStructure<Data>(pos));
-                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
-                Console.WriteLine($"{resultList.Last<Data>().count.ToString()} - { System.Text.Encoding.ASCII.GetString(resultList.Last<Data>().data)}"); ;
+                var currentData = Data.PtrToThis(data);
+                do
+                {
+                    Console.WriteLine($"{currentData.info} - {currentData.subInfo} - {currentData.messageStr}");
+                    resultList.Add(currentData);
+                    currentData = currentData.GetNext;
+                } while (currentData != null);
+                resultList.Remove(null);
             }
 
             return resultList;
+        }
+
+        [DllImport("Win32CppLib")]
+        private static extern void GetDataByArray(out IntPtr ptr, out int count);
+
+        public static List<Data> GetDataByArray() {
+            var resultList = new List<Data>();
+            IntPtr data;
+            int count;
+            NativeLib.GetDataByArray(out data, out count);
+
+            var pos = new IntPtr(data.ToInt64());
+            for (int i = 0; i< count; i++)
+            {
+                resultList.Add(Data.PtrToThis(pos));
+                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
+                Console.WriteLine($"{resultList.Last<Data>().info} - {resultList.Last<Data>().subInfo} - { resultList.Last<Data>().messageStr}"); ;
+            }
+
+            return resultList;
+        }
+
+
+
+        
+        [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
+        private static extern void Cleanup();
+
+        public static void Clean()
+        {
+            NativeLib.Cleanup();
         }
     }
 

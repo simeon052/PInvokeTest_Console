@@ -12,8 +12,10 @@
 #include <windows.h>
 
 struct Data {
-	int error;
-	char errormessage[32];
+	int info;
+	int subInfo;
+	LPWSTR message;
+	struct Data *next;
 };
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください
@@ -22,10 +24,14 @@ extern "C"
 
 __declspec(dllexport) 	int add(int a, int b);
 
-__declspec(dllexport) 	char * addstr(char **src, int length);
+__declspec(dllexport) 	void addstr(char *src, int length);
 
-__declspec(dllexport) 	void replacestr(char **src, int length);
+__declspec(dllexport) 	void replacestr(char *src, int length, int capacity);
 
-__declspec(dllexport)   void GetErrors(struct Data *, int);
+__declspec(dllexport)   void GetData(struct Data **);
+
+__declspec(dllexport)   void Cleanup();
+
+__declspec(dllexport)   void GetDataByArray(struct Data** dataList, int *count);
 
 }

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <tchar.h>
+#include <stdio.h>
+
 
 
 __declspec(dllexport)
@@ -14,36 +16,97 @@ int add(int a, int b)
 	return a + b;
 }
 
-void replacestr(char **pstrsrc, int length)
+void replacestr(char *pstrsrc, int length, int capacity)
 {
 	for (int i = 0; i < length; i++)
 	{
-		(*pstrsrc)[i] = '*';
+		if (pstrsrc[i] == 's') {
+			pstrsrc[i] = '*';
+		}
 	}
 	return;
 }
 
 
-char* addstr(char **pstrsrc, int length)
+void addstr(char *pstrsrc, int capacity)
 {
-	char* addstr = "_Windows";
+	strcat_s(pstrsrc, capacity, "_Test");
 
-	char* pstrDist = (char *)malloc(length + 9);
-	memcpy(pstrDist, *pstrsrc, length);
-	memcpy(pstrDist + length, addstr, 9);
-	OutputDebugStringA(pstrDist);
-	return pstrDist;
+	return;
 }
 
 
-void GetErrors(struct Data* list, int count) {
+static struct Data* stored;
 
-	for (int i = 0; i < count; i++) {
-		(list + i)->error = i;
-		strcpy_s((list + i)->errormessage,"Error Message");
-		OutputDebugString(_T("Now"));
+///
+/// データの領域を確保して、リストにして返す
+///
+void GetData(struct Data** dataList) {
+
+	int count = 5;
+	struct Data *currentPos;
+	currentPos = new struct Data;
+	*dataList = currentPos; // 先頭を保存
+
+	stored = currentPos;
+
+	int i = 0;
+	while (1) {
+		currentPos->info = i + 1; //現在の要素に値を代入
+		currentPos->subInfo = i + 0xff;
+		currentPos->message = L"Some message";
+
+		if (i + 1 >= count) {
+			currentPos->next = nullptr;
+			printf("  >>> 0x%016llx [%d]\n       -> 0x%16llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
+			break;
+		}
+		else
+		{
+			//次の要素を確保
+			currentPos->next = new struct Data;
+			printf("  >>> 0x%016llx [%d]\n       -> 0x%016llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
+			currentPos = currentPos->next; // 要素を次に移動
+		}
+		i++;
 	}
 
 	return;
 }
- 
+
+static struct Data* Array;
+///
+/// データの領域を確保して、配列にして返す
+///
+void GetDataByArray(struct Data** dataList, int *count) {
+
+	*count = 5;
+	*dataList = new struct Data[*count];
+	Array = *dataList;
+	for (int i = 0; i < *count; i++) {
+		(*dataList)[i].info = i;
+		(*dataList)[i].subInfo = i + 0xff;
+		(*dataList)[i].message = L"Some message 2";
+	}
+
+	return;
+}
+
+
+
+void Cleanup() {
+
+	if (stored != nullptr) {
+		struct Data *tmp = stored->next;
+		do {
+			delete stored;
+			stored = tmp;
+			tmp = stored->next;
+		} while (tmp != nullptr);
+		delete stored;
+	}
+
+	if (Array != nullptr) {
+		delete[] Array;
+	}
+}
