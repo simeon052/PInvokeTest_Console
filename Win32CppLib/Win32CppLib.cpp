@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 
+
 __declspec(dllexport)
 
 int add(int a, int b)
@@ -35,12 +36,16 @@ void addstr(char *pstrsrc, int capacity)
 }
 
 
+static struct Data* stored;
+
 void GetData(struct Data** dataList) {
 
 	int count = 5;
 	struct Data *currentPos;
 	currentPos = new struct Data;
 	*dataList = currentPos; // æ“ª‚ð•Û‘¶
+
+	stored = currentPos;
 
 	int i = 0;
 	while (1) {
@@ -64,4 +69,19 @@ void GetData(struct Data** dataList) {
 	}
 
 	return;
+}
+
+
+void Cleanup() {
+
+	if (stored != nullptr) {
+			struct Data *tmp;
+			tmp = stored->next;
+		do {
+			delete(stored);
+			stored = tmp;
+			tmp = stored->next;
+		} while (tmp != nullptr);
+		delete(stored);
+	}
 }

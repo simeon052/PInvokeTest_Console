@@ -30,4 +30,5 @@ __declspec(dllexport) 	void replacestr(char *src, int length, int capacity);
 
 __declspec(dllexport)   void GetData(struct Data **);
 
+__declspec(dllexport)   void Cleanup();
 }
