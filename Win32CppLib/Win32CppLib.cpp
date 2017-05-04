@@ -15,25 +15,23 @@ int add(int a, int b)
 	return a + b;
 }
 
-void replacestr(char **pstrsrc, int length)
+void replacestr(char *pstrsrc, int length, int capacity)
 {
 	for (int i = 0; i < length; i++)
 	{
-		(*pstrsrc)[i] = '*';
+		if (pstrsrc[i] == 's') {
+			pstrsrc[i] = '*';
+		}
 	}
 	return;
 }
 
 
-char* addstr(char **pstrsrc, int length)
+void addstr(char *pstrsrc, int capacity)
 {
-	char* addstr = "_Windows";
+	strcat_s(pstrsrc, capacity, "_Test");
 
-	char* pstrDist = (char *)malloc(length + 9);
-	memcpy(pstrDist, *pstrsrc, length);
-	memcpy(pstrDist + length, addstr, 9);
-	OutputDebugStringA(pstrDist);
-	return pstrDist;
+	return;
 }
 
 
@@ -52,14 +50,14 @@ void GetData(struct Data** dataList) {
 
 		if (i + 1 >= count) {
 			currentPos->next = nullptr;
-			printf("0x%016llx [%d]\n  -> 0x%16llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
+			printf("  >>> 0x%016llx [%d]\n       -> 0x%16llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
 			break;
 		}
 		else
 		{
 			//ŽŸ‚Ì—v‘f‚ðŠm•Û
 			currentPos->next = new struct Data;
-			printf("0x%016llx [%d]\n  -> 0x%016llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
+			printf("  >>> 0x%016llx [%d]\n       -> 0x%016llx\n", (UINT64)currentPos, currentPos->info, (UINT64)currentPos->next);
 			currentPos = currentPos->next; // —v‘f‚ðŽŸ‚ÉˆÚ“®
 		}
 		i++;
