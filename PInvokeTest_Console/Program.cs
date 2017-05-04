@@ -14,11 +14,9 @@ namespace PInvokeTest_Console
 
             Console.WriteLine($"Add : {NativeLib.Add(1, 1).ToString()}");
 
-            Console.WriteLine($"Replace string : {NativeLib.Replacestr("Test")}");
+            Console.WriteLine($"Replace string : {NativeLib.Replacestr("Password")}");
 
             Console.WriteLine($"Add string : {NativeLib.Addstr("Test")}");
-
-//            NativeLib.GetErrors_cs();
 
             NativeLib.GetData();
         }
@@ -32,7 +30,7 @@ namespace PInvokeTest_Console
         [MarshalAs(UnmanagedType.I4)]
         public int subInfo;
 
-        public IntPtr messasg;
+        public IntPtr message;
 
         public IntPtr next;
 
@@ -44,10 +42,10 @@ namespace PInvokeTest_Console
         private static extern int add(int a, int b);
  
         [DllImport("Win32CppLib")]
-        private static extern IntPtr addstr(ref string src, int length);
+        private static extern void addstr([MarshalAs(UnmanagedType.LPStr)] StringBuilder src, int capacity);
 
         [DllImport("Win32CppLib")]
-        private static extern void replacestr(ref string src, int length);
+        private static extern void replacestr([MarshalAs(UnmanagedType.LPStr)] StringBuilder srcsrc, int length, int capacity);
 
         public static int Add(int a, int b)
         {
@@ -56,17 +54,20 @@ namespace PInvokeTest_Console
 
         public static string Replacestr(string src)
         {
-            string dst = src;
-            NativeLib.replacestr(ref dst, dst.Length);
-            return dst;
+            var dst = new StringBuilder(256);
+            dst.Append(src);
+            NativeLib.replacestr(dst, dst.Length, dst.Capacity);
+            return dst.ToString();
         }
 
         public static string Addstr(string src)
         {
-            string dst = src;
-            var result = NativeLib.addstr(ref dst, dst.Length);
-            var resultStr = Marshal.PtrToStringAnsi(result);
-            return resultStr;
+            StringBuilder dst = new StringBuilder(256);
+            dst.Append(src);
+
+            NativeLib.addstr(dst, dst.Capacity);
+            
+            return dst.ToString();
         }
 
         [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
@@ -87,7 +88,7 @@ namespace PInvokeTest_Console
                 bool loopend = false;
                 do
                 {
-                    Console.WriteLine($"{currentData.info} - {currentData.subInfo} - {Marshal.PtrToStringUni(currentData.messasg)}");
+                    Console.WriteLine($"{currentData.info} - {currentData.subInfo} - {Marshal.PtrToStringUni(currentData.message)}");
                     if (currentData.next != IntPtr.Zero)
                     {
                         resultList.Add((Data)(Marshal.PtrToStructure<Data>(currentData.next)));

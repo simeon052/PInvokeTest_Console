@@ -24,9 +24,9 @@ extern "C"
 
 __declspec(dllexport) 	int add(int a, int b);
 
-__declspec(dllexport) 	char * addstr(char **src, int length);
+__declspec(dllexport) 	void addstr(char *src, int length);
 
-__declspec(dllexport) 	void replacestr(char **src, int length);
+__declspec(dllexport) 	void replacestr(char *src, int length, int capacity);
 
 __declspec(dllexport)   void GetData(struct Data **);
 
