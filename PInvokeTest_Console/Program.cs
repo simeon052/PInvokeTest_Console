@@ -19,6 +19,8 @@ namespace PInvokeTest_Console
             Console.WriteLine($"Add string : {NativeLib.Addstr("Test")}");
 
             NativeLib.GetData();
+
+            NativeLib.Clean();
         }
     }
     [StructLayout(LayoutKind.Sequential)]
@@ -98,6 +100,9 @@ namespace PInvokeTest_Console
         [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
         private static extern void GetData(out IntPtr data);
 
+        [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
+        private static extern void Cleanup();
+
         public static List<Data> GetData()
         {
             var resultList = new List<Data>();
@@ -120,6 +125,11 @@ namespace PInvokeTest_Console
             }
 
             return resultList;
+        }
+
+        public static void Clean()
+        {
+            NativeLib.Cleanup();
         }
     }
 
