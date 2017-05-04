@@ -20,6 +20,8 @@ namespace PInvokeTest_Console
 
             NativeLib.GetData();
 
+            NativeLib.GetDataByArray();
+
             NativeLib.Clean();
         }
     }
@@ -100,9 +102,6 @@ namespace PInvokeTest_Console
         [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
         private static extern void GetData(out IntPtr data);
 
-        [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
-        private static extern void Cleanup();
-
         public static List<Data> GetData()
         {
             var resultList = new List<Data>();
@@ -126,6 +125,32 @@ namespace PInvokeTest_Console
 
             return resultList;
         }
+
+        [DllImport("Win32CppLib")]
+        private static extern void GetDataByArray(out IntPtr ptr, out int count);
+
+        public static List<Data> GetDataByArray() {
+            var resultList = new List<Data>();
+            IntPtr data;
+            int count;
+            NativeLib.GetDataByArray(out data, out count);
+
+            var pos = new IntPtr(data.ToInt64());
+            for (int i = 0; i< count; i++)
+            {
+                resultList.Add(Data.PtrToThis(pos));
+                pos = IntPtr.Add(pos, Marshal.SizeOf<Data>());
+                Console.WriteLine($"{resultList.Last<Data>().info} - {resultList.Last<Data>().subInfo} - { resultList.Last<Data>().messageStr}"); ;
+            }
+
+            return resultList;
+        }
+
+
+
+        
+        [DllImport("Win32CppLib", CharSet = CharSet.Unicode)]
+        private static extern void Cleanup();
 
         public static void Clean()
         {
