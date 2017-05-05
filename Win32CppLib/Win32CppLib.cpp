@@ -93,7 +93,9 @@ void GetDataByArray(struct Data** dataList, int *count) {
 }
 
 
-
+///
+/// clean up memory that is allocated in DLL
+///
 void Cleanup() {
 
 	if (stored != nullptr) {
